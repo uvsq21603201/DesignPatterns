@@ -1,191 +1,45 @@
-# Exemple de projet Maven/Java
+<h1 align=center>Patrons de conception</h1>
 
-## Étape 1 : initialiser le projet
-### Créer le projet à partir d'un archétype
-L'archétype `org.apache.maven.archetypes:maven-archetype-quickstart` permet de créer un squelette de projet Maven/Java.
+## 4.6 Exercices
+### Exercice 4.1 (Builder,Composite,Iterator)
+Dans cet exercice, vous réaliserez un annuaire des personnels d’une organisation.
+Un personnel possède un nom, un prénom, une date de naissance, des numéros de téléphone (fixe pro,
+fixe perso, portable, . . .) et des fonctions (par exemple directeur de XXX, chargé de mission XXX, . . .).
+L’annuaire reflétera la structure hiérarchique de l’organisation (par exemple, département/service/équipe). Chaque niveau peut comporter des individus ou des sous-hiérarchies. Les différents niveaux de
+structuration ne sont pas connus à priori.
+On veut pouvoir afficher les personnels de l’organisation de deux manières : hiérarchiques (en profondeur) et par groupe (en largeur).
+1. Représentez les personnels par une classe immuable Personnel. Le nom, le prénom et les fonctions
+seront implémentés par des chaînes de caractères, la date de naissance par java.time.LocalDate
+et les numéros de téléphone par une collection d’un type que vous définirez. L’initialisation d’un
+personnel respectera le pattern Builder
+2. Définissez la notion de groupe de personnels en vous appuyant sur le pattern Composite
+3. Implémentez les deux types d’affichage en définissant deux stratégies de parcours de la structure. Ces
+dernières se baseront sur le pattern Iterator. Plus précisément, vous vous appuierez sur les interfaces
+java.util.iterator et java.lang.iterable.
 
-```bash
-mvn archetype:generate \
-    -DinteractiveMode=false \
-    -DarchetypeGroupId=org.apache.maven.archetypes \
-    -DarchetypeArtifactId=maven-archetype-quickstart \
-    -DarchetypeVersion=1.4 \
-    -DgroupId=fr.uvsq.poo \
-    -DartifactId=maven-exemple \
-    -Dpackage=fr.uvsq.poo.compte
-```
 
-### Initialiser le dépôt git
-```bash
-git init
-git add .
-git commit -m"Initialise le projet Maven"
-```
-Après ces commandes, le dépôt comporte un _commit_ sur la branche _master_.
-
-### Faire le lien avec le dépôt distant sur la forge (_github_, _bitbucket_, ...)
-Tout d'abord, il est nécessaire de créer le dépôt distant sur la forge.
-Ensuite, il suffit de le lier avec le dépôt local.
-
-```bash
-git remote add origin git@github.com:hal91190/maven-exemple.git
-git push -u origin master
-```
-
-### Vérifier la construction du projet avec Maven
-On génère un `jar` du projet.
-
-```bash
-mvn package
-```
-
-Cette commande crée un répertoire `target` contenant les résultats de la construction du projet.
-Ce répertoire ne doit pas être ajouté au dépôt git.
-On ajoute donc un fichier `.gitignore` à partir du modèle se trouvant sur [github](https://raw.githubusercontent.com/github/gitignore/master/Maven.gitignore).
-
-### Importer le projet dans l'IDE
-La plupart des IDEs permettent d'importer un projet Maven.
-Il est préférable de ne pas ajouter les fichiers spécifiques à l'IDE dans le dépôt git.
-On modifie donc le `.gitignore` en conséquence.
-
-## Étape 2 : configurer le projet
-### Fixer la version 11 de Java pour les sources et la cible
-Il suffit pour cela d'ajouter deux propriétés dans le `pom.xml`.
-
-```xml
-<properties>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
-</properties>
-```
-
-### Changer la version de JUnit pour la version 4.13.1
-On modifie la dépendance dans le `pom.xml`.
-
-```xml
-<dependency>
-    <groupId>junit</groupId>
-    <artifactId>junit</artifactId>
-    <version>4.13.1</version>
-    <scope>test</scope>
-</dependency>
-```
-
-### Rendre le `jar` exécutable
-Pour cela, il indiquer à Maven d'ajouter un fichier `Manifest` dans le `jar` en précisant l'attribut `Main-class`.
-
-```xml
-<build>
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <version>3.0.2</version>
-            <configuration>
-                <archive>
-                    <manifest>
-                        <mainClass>fr.uvsq.poo.compte.App</mainClass>
-                    </manifest>
-                </archive>
-            </configuration>
-        </plugin>
-    </plugins>
-</build>
-```
-
-À partir de là, il est possible d'exécuter l'application avec `java -jar target/maven-exemple-1.0-SNAPSHOT.jar`.
-
-## Étape 3 : améliorer le projet (optionnel)
-### Créer un `jar` intégrant les dépendances
-Le plugin [`assembly`](https://maven.apache.org/plugins/maven-assembly-plugin/) permet de générer une archive contenant l'ensemble des dépendances d'un projet.
-
-```xml
-<build>
-    <plugins>
-        <plugin>
-            <artifactId>maven-assembly-plugin</artifactId>
-            <version>3.1.0</version>
-            <configuration>
-                <descriptorRefs>
-                    <descriptorRef>jar-with-dependencies</descriptorRef>
-                </descriptorRefs>
-                <archive>
-                    <manifest>
-                        <mainClass>${main-class}</mainClass>
-                    </manifest>
-                </archive>
-            </configuration>
-            <executions>
-                <execution>
-                    <id>make-assembly</id>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>single</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-    </plugins>
-</build>
-```
-
-### Créer un `jar` des sources du projet
-Le plugin [`source`](https://maven.apache.org/plugins/maven-source-plugin/) permet de générer une archive des sources du projet.
-
-```xml
-<build>
-    <plugins>
-        <plugin>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>3.0.1</version>
-            <executions>
-                <execution>
-                    <id>attach-sources</id>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>jar-no-fork</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-    </plugins>
-</build>
-```
-
-### Créer un `jar` avec la javadoc
-Le plugin [`javadoc`](https://maven.apache.org/plugins/maven-javadoc-plugin/) permet de générer une archive de la javadoc.
-
-```xml
-<build>
-    <plugins>
-        <plugin>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.0.0-M1</version>
-            <executions>
-                <execution>
-                    <id>attach-javadocs</id>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>jar</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-    </plugins>
-</build>
-```
-
-### Intégrer l'extension Hamcrest pour JUnit
-Cette [extension]() apporte un syntaxe plus lisible pour les tests JUnit.
-
-```xml
-<!-- https://mvnrepository.com/artifact/org.hamcrest/hamcrest-all -->
-<dependency>
-    <groupId>org.hamcrest</groupId>
-    <artifactId>hamcrest-all</artifactId>
-    <version>1.3</version>
-    <scope>test</scope>
-</dependency>
-```
-
-### Étape 4 : implémenter la classe `Account` et les tests unitaires
+### Exercice 4.2 (Command)
+Dans cet exercice, on souhaite réaliser une calculatrice fonctionnant en mode RPN (Reverse Polish Notation). Cette notation post-fixée permet de représenter des formules arithmétiques sans parenthèses. Par
+exemple, l’expression « 2 × (3 + 4) » pourra s’écrire « 234 + × ».
+Cette calculatrice devra supporter les opérations de base (+, -, *, /) sur des nombres entiers.
+L’interface utilisateur utilisera un interpréteur en mode texte. L’utilisateur saisira au clavier soit un nombre,
+soit une opération, soit undo pour annuler la saisie précédente, soit exit pour sortir. Chaque saisie se
+terminera par entrée.
+L’implémentation pourra utiliser une pile de la façon suivante :
+— les opérandes sont empilées lors de leur saisie,
+— les opérations sont effectuées immédiatement en considérant les opérandes se trouvant au sommet
+de la pile,
+— le résultat d’une opération est empilé.
+Après chaque saisie, l’interpréteur affichera le contenu de la pile.
+Pour la conception, vous pourrez consulter Example calculator design.
+1. Implémentez un interpréteur générique Interpreteur qui supporte uniquement les commandes
+undo et quit. La commande quit stoppe le programme. La commande undo supprime la dernière
+commande de l’historique. Vous utiliserez le pattern Command pour implémenter les actions.
+2. Dérivez la classe MoteurRPN de l’interpréteur. Elle devra permettre de :
+— enregistrer une opérande,
+— appliquer une opération sur les opérandes,
+— retourner l’ensemble des opérandes stockées.
+Vous utiliserez le pattern Command pour implémenter les actions.
+3. Implémenter la classe SaisieRPN qui gère les interactions avec l’utilisateur et invoque le moteur
+RPN. La classe java.util.Scanner permet de gérer les saisies.
+4. Implémenter le programme principal CalculatriceRPN.
