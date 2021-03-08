@@ -14,3 +14,8 @@ buildNumber.properties
 # IntelliJ files
 .idea/
 maven-exemple.iml
+
+
+.settings/
+.classpath
+.project
